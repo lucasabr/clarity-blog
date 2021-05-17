@@ -1,28 +1,15 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const uri = "mongodb+srv://lucasabr:topsecretpassword123@lucas-database.ckz0z.mongodb.net/website-test?retryWrites=true&w=majority";
+
+
+const PORT = process.env.PORT || 5000;
 const app = express();
-const MongoClient = require('mongodb').MongoClient;
-main();
-async function listDatabases(client){
-    databasesList = await client.db().admin().listDatabases();
- 
-    console.log("Databases:");
-    databasesList.databases.forEach(db => console.log(` - ${db.name}`));
-};
 
-async function main(){
-    const uri = "mongodb+srv://lucasabr:<topsecretpassword123>@lucas-database.ckz0z.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-    const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    try {
-        await client.connect();
-        await  listDatabases(client);
-    } catch (e) {
-        console.error(e);
-    } finally {
-        await client.close();
-    }
-}
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true})
+    .then((result) => app.listen(PORT))
+    .catch((err) => console.log(err))
 
-main().catch(console.error);
 
 app.set('view-engine', 'ejs');
 
@@ -42,8 +29,6 @@ app.get('/register', (req, res) => {
     res.render('register.ejs')
 })
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     
 })
-const PORT = process.env.PORT || 5000;
-app.listen(PORT);
