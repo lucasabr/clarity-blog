@@ -9,13 +9,10 @@ const PORT = process.env.PORT || 5000;
 const bcrypt = require('bcrypt');
 const flash = require('express-flash')
 const session = require('express-session')
-//Passport Init
-const passport = require('passport');
-const initializePass = require('./pass-config')
-initializePass(passport, 
-    email => user.findOne({email: email}),
-    id => user.findOne({id: id})
-);
+var bodyParser = require('body-parser')
+app.use(express.json());
+app.use(express.urlencoded({extended: false}));
+app.use(express.static('source'));
 //Database Init
 const mongoose = require('mongoose');
 const User =  require('./models/user');
@@ -27,15 +24,24 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true})
 
 
 
+//Passport Init
+const passport = require('passport');
+const initializePass = require('./passport-config')
+initializePass(passport);
+ 
 app.set('view-engine', 'ejs');
-app.use(flash())
+app.use(flash());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
-}))
+}));
 app.use(passport.initialize())
 app.use(passport.session())
+const jsonParser = bodyParser.json()
+const urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+
 
 app.get('/', (req, res) => {
     res.render('index.ejs')
@@ -55,13 +61,13 @@ app.get('/register', (req, res) => {
     res.render('register.ejs')
 })
 
-app.post('/register', async (req, res) => {
+app.post('/register', urlencodedParser, async (req, res) => {
     try{
-        const hashedPassword = await bcrypt.hash('req.body.password', 10)
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const user = new User({
-            name: 'req.body.name',
-            email: 'req.body.email',
-            password: 'hashedPassword'
+            name: req.body.name,
+            email: req.body.email,
+            password: hashedPassword
         });
         user.save()
             .then((result) => res.redirect('/login'))
