@@ -10,7 +10,10 @@ const bcrypt = require('bcrypt');
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
-var bodyParser = require('body-parser')
+
+const emailer = require('./emailer')
+const email = new emailer()
+
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(express.static('source'));
@@ -73,6 +76,7 @@ app.post('/register', checkNotAuthenticated, (req, res) => {
                     .then(async user2 => {
                         if(!user2){
                             //if there is no user with the username, saves to database
+                            email.sendEmail(req.body.email)
                             try{
                                 const hashedPassword = await bcrypt.hash(req.body.password, 10);
                                 const user = new User({
@@ -116,3 +120,6 @@ function checkNotAuthenticated(req, res, next) {
     if(req.isAuthenticated()) return res.redirect('./')
     next()
 }
+
+
+
