@@ -1,7 +1,6 @@
 if (process.env.NODE_ENV !== 'production') { 
     require('dotenv').config()
 }
-
 //Basic App Init
 const express = require('express');
 const app = express();
@@ -10,7 +9,7 @@ const bcrypt = require('bcrypt');
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
-
+const jwt = require("jsonwebtoken");
 const emailer = require('./emailer')
 const email = new emailer()
 
@@ -76,16 +75,19 @@ app.post('/register', checkNotAuthenticated, (req, res) => {
                     .then(async user2 => {
                         if(!user2){
                             //if there is no user with the username, saves to database
-                            email.sendEmail(req.body.email)
                             try{
                                 const hashedPassword = await bcrypt.hash(req.body.password, 10);
                                 const user = new User({
                                     name: req.body.name,
                                     email: req.body.email,
-                                    password: hashedPassword
+                                    password: hashedPassword,
+                                    confirmed: false
                                 });
                                 user.save()
-                                    .then((result) => res.redirect('/login'))
+                                    .then((result) => {
+                                        email.sendEmail(req.body.email, user.id)
+                                        res.render("register.ejs", {message: "Please confirm your account via email before logging in."})
+                                    })
                                     .catch((err) => console.log(err))
                             } catch (e){
                                 console.log(e);

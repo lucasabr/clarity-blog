@@ -1,11 +1,14 @@
 const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
+const mongoose = require('mongoose');
+const User =  require('./models/user');
 class emailer{
 
 
-    sendEmail(email){
+    sendEmail(email, id){
     
         // create reusable transporter object using the default SMTP transport
-        nodemailer.createTestAccount(async (err, account) => {
+        nodemailer.createTestAccount((err, account) => {
             let transporter = nodemailer.createTransport({
                 host: "smtp.gmail.com",
                 auth: {
@@ -13,19 +16,29 @@ class emailer{
                     pass: process.env.GMAIL_PASS, 
                 },
             });
-    
-            let info = await transporter.sendMail({
-                from: '"Clarity Blog" <claritybotconfirm@gmail.com>', // sender address
-                to: email, // list of receivers
-                subject: "Please confirm your account with Clarity", // Subject line
-                text: "Hello world?", // plain text body
-            });
-            console.log("Message sent: %s", info.messageId);
-            // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-    
-            // Preview only available when sending through an Ethereal account
-            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-            // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+
+            User.findOne({ email: email })
+                .then(user => {
+                    jwt.sign(
+                        {
+                            id
+                        },
+                        process.env.EMAIL_SECRET,
+                        {
+                            expiresIn: '1d',
+                        },
+                        async (err, token) => {
+                            const url = `https://localhost:5000/confirmation/${token}`;
+                            let info = await transporter.sendMail({
+                                from: '"Clarity Blog" <claritybotconfirm@gmail.com>', // sender address
+                                to: email, // list of receivers
+                                subject: "Please confirm your account with Clarity", // Subject line
+                                html: `Please click this link to confirm your email: <a href="${url}">link</a>`
+                            });
+                        }
+                    )
+                })
+            
         })
     
     

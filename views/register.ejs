@@ -1,9 +1,9 @@
 <h1>Register</h1>
 <h3><%= message %></h3>
-<form action="/register" method="POST">
+<form action="/register" autocomplete="off" method="POST">
   <div>
     <label for="name">Name</label>
-    <input type="text" id="name" name="name" required>
+    <input type="text" autocomplete="new-password" onkeypress="return event.charCode != 32" onpaste="return false" id="name" name="name" required>
   </div>
   <div>
     <label for="email">Email</label>
