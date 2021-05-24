@@ -11,6 +11,9 @@ function initialize(passport){
                 if(!user) {
                     return done(null, false, {message: 'No user with that email'})
                 }
+                if(!user.confirmed){
+                    return done(null, false, {message: 'Your account is not yet confirmed'})
+                }
                 //Match password
                 bcrypt.compare(password, user.password, (err, isMatch) => {
                     if(err) throw err;
