@@ -6,7 +6,6 @@ class emailer{
 
 
     sendEmail(email, id){
-    
         // create reusable transporter object using the default SMTP transport
         nodemailer.createTestAccount((err, account) => {
             let transporter = nodemailer.createTransport({
@@ -28,7 +27,7 @@ class emailer{
                             expiresIn: '1d',
                         },
                         async (err, token) => {
-                            const url = `https://localhost:5000/confirmation/${token}`;
+                            const url = `http://localhost:5000/confirmation/${token}`;
                             let info = await transporter.sendMail({
                                 from: '"Clarity Blog" <claritybotconfirm@gmail.com>', // sender address
                                 to: email, // list of receivers

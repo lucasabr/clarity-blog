@@ -12,27 +12,20 @@ const methodOverride = require('method-override')
 const jwt = require("jsonwebtoken");
 const emailer = require('./emailer')
 const email = new emailer()
-
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(express.static('source'));
-
 //Database Init
 const mongoose = require('mongoose');
 const User =  require('./models/user');
 const uri = "mongodb+srv://lucasabr:topsecretpassword123@lucas-database.ckz0z.mongodb.net/website-test?retryWrites=true&w=majority";
-
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true})
     .then((result) => app.listen(PORT))
     .catch((err) => console.log(err))
-
-
-
 //Passport Init
 const passport = require('passport');
 const initializePass = require('./passport-config')
 initializePass(passport);
- 
 app.set('view-engine', 'ejs');
 app.use(flash());
 app.use(session({
@@ -46,7 +39,7 @@ app.use(methodOverride('_method'))
 
 
 
-
+//Routes and Requests
 app.get('/', checkAuthenticated, (req, res) => {
     res.render('index.ejs', {name: req.user.name})
 })
@@ -68,46 +61,57 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 app.post('/register', checkNotAuthenticated, (req, res) => {
     //looks for a user with the email
     User.findOne({email: req.body.email})
-        .then(user => {
-            if(!user){
-                //if there is no user with the email, looks for a user with the same username
-                User.findOne({name: req.body.name})
-                    .then(async user2 => {
-                        if(!user2){
-                            //if there is no user with the username, saves to database
-                            try{
-                                const hashedPassword = await bcrypt.hash(req.body.password, 10);
-                                const user = new User({
-                                    name: req.body.name,
-                                    email: req.body.email,
-                                    password: hashedPassword,
-                                    confirmed: false
-                                });
-                                user.save()
-                                    .then((result) => {
-                                        email.sendEmail(req.body.email, user.id)
-                                        res.render("register.ejs", {message: "Please confirm your account via email before logging in."})
-                                    })
-                                    .catch((err) => console.log(err))
-                            } catch (e){
-                                console.log(e);
-                                res.redirect('/register')
-                            }
-                        } else{
-                            res.render("register.ejs", {message: "ERROR! There already exists an account with this username"})
-                        }
-                        })
-                        .catch(e => console.log(e))
-                
-        } else{
+    .then(user => {
+        if(user){
             res.render("register.ejs", {message: "ERROR! There already exists an account with this email"})
-        }
-    })
-        .catch( e => console.log(e))
-        
-      
+        } else {
+            User.findOne({name: req.body.name})
+            .then(async user2 => {
+                if(user2){
+                    res.render("register.ejs", {message: "ERROR! There already exists an account with this username"})
+                } else {
+                    try{
+                        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+                        const user = new User({
+                            name: req.body.name,
+                            email: req.body.email,
+                            password: hashedPassword,
+                            confirmed: false
+                        });
+                        user.save()
+                        .then((result) => {
+                            email.sendEmail(req.body.email, user.id)
+                            res.render("register.ejs", {message: "Please confirm your account via email before logging in."})
+                        })
+                        .catch((err) => console.log(err))
+                    } catch (e){
+                            console.log(e);
+                            res.redirect('/register')
+                            }
+                        }            
+                })
+            }
+            })   
 })
 
+app.get('/confirmation/:token', (req,res) => {
+    jwt.verify(req.params.token, process.env.EMAIL_SECRET, (err, decoded) =>{
+        if(err){
+            res.send('error')
+            console.log(e)
+        }
+        else {
+            const id = decoded.id
+            console.log(id)
+            User.findOneAndUpdate({_id: id}, {confirmed: true})
+            .then(() => res.redirect('/login'))
+            .catch((e) => {
+                res.send('error')
+                console.log(e)
+            })
+        }
+    })
+})
 app.delete('/logout', (req,res) => {
     req.logOut()
     res.redirect('/login')
