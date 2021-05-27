@@ -93,16 +93,23 @@ app.post('/register', checkNotAuthenticated, (req, res) => {
             }
             })   
 })
+app.get('/confirmation', (req,res) => {
+    res.render("confirm.ejs", {message: ""})
+})
+
+app.post('/confirmation', (req,res) => {
+        
+})
 
 app.get('/confirmation/:token', (req,res) => {
     jwt.verify(req.params.token, process.env.EMAIL_SECRET, (err, decoded) =>{
         if(err){
             res.send('error')
-            console.log(e)
+            console.log(err)
         }
         else {
             const id = decoded.id
-            console.log(id)
+            console.log(decoded)
             User.findOneAndUpdate({_id: id}, {confirmed: true})
             .then(() => res.redirect('/login'))
             .catch((e) => {
