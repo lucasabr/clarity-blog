@@ -15,28 +15,25 @@ class emailer{
                     pass: process.env.GMAIL_PASS, 
                 },
             });
-
-            User.findOne({ email: email })
-                .then(user => {
-                    jwt.sign(
-                        {
-                            id
-                        },
-                        process.env.EMAIL_SECRET,
-                        {
-                            expiresIn: '1d',
-                        },
-                        async (err, token) => {
-                            const url = `http://localhost:5000/confirmation/${token}`;
-                            let info = await transporter.sendMail({
-                                from: '"Clarity Blog" <claritybotconfirm@gmail.com>', // sender address
-                                to: email, // list of receivers
-                                subject: "Please confirm your account with Clarity", // Subject line
-                                html: `Please click this link to confirm your email: <a href="${url}">link</a>`
-                            });
-                        }
-                    )
-                })
+            jwt.sign(
+                {
+                    id
+                },
+                process.env.EMAIL_SECRET,
+                {
+                expiresIn: '1d',
+                },
+                async (err, token) => {
+                    const url = `http://localhost:5000/confirmation/${token}`;
+                    let info = await transporter.sendMail({
+                        from: '"Clarity Blog" <claritybotconfirm@gmail.com>', // sender address
+                        to: email, // list of receivers
+                        subject: "Please confirm your account with Clarity", // Subject line
+                        html: `Please click this link to confirm your email: <a href="${url}">link</a>`
+                    });
+                }
+            )
+                
             
         })
     

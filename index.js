@@ -98,14 +98,25 @@ app.get('/confirmation', (req,res) => {
 })
 
 app.post('/confirmation', (req,res) => {
-        
+    User.findOne({email: req.body.email})
+    .then(user => {
+        if(!user){
+            res.render("confirm.ejs", {message: "No account exists with the provided email"})
+        }
+        else if(user.confirmed){
+            res.render("confirm.ejs", {message: "The following account has already been confirmed"})
+        }
+        else{
+            email.sendEmail(user.email, user.id)
+            res.render("confirm.ejs", {message: "Confirmation sent to your email"})
+        }
+    })
 })
 
 app.get('/confirmation/:token', (req,res) => {
     jwt.verify(req.params.token, process.env.EMAIL_SECRET, (err, decoded) =>{
         if(err){
-            res.send('error')
-            console.log(err)
+            res.render("confirm.ejs", {message: "This confirmation link has expired. Enter your email below to confirm your account."})
         }
         else {
             const id = decoded.id
