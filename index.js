@@ -58,40 +58,30 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs', {message: "You must register to access many of the sites features"})
 })
 
-app.post('/register', checkNotAuthenticated, (req, res) => {
-    //looks for a user with the email
-    User.findOne({email: req.body.email})
-    .then(user => {
-        if(user){
-            res.render("register.ejs", {message: "ERROR! There already exists an account with this email"})
-        } else {
-            User.findOne({name: req.body.name})
-            .then(async user2 => {
-                if(user2){
-                    res.render("register.ejs", {message: "ERROR! There already exists an account with this username"})
-                } else {
+app.post('/register', checkNotAuthenticated, async (req, res) => {
+    User.isMailUnique(req.body.email, function(isUnique) {
+        if(!isUnique){
+            res.render("register.ejs", {message: "ERROR! There already exists an account with this email"}) 
+            unique=false
+        }
+        else{
+            User.isNameUnique(req.body.name, async function(isUnique) {
+                if(!isUnique){
+                    res.render("register.ejs", {message: "ERROR! There already exists an account with this name"}) 
+                    unique=false
+                } else{
                     try{
                         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-                        const user = new User({
-                            name: req.body.name,
-                            email: req.body.email,
-                            password: hashedPassword,
-                            confirmed: false
-                        });
-                        user.save()
-                        .then((result) => {
-                            email.sendEmail(req.body.email, user.id)
-                            res.render("register.ejs", {message: "Please confirm your account via email before logging in."})
-                        })
-                        .catch((err) => console.log(err))
+                        User.create(req.body.name, req.body.email, hashedPassword, false)
+                        res.render("register.ejs", {message: "Please confirm your account via email before logging in."})
                     } catch (e){
-                            console.log(e);
-                            res.redirect('/register')
-                            }
-                        }            
-                })
-            }
-            })   
+                        console.log(e);
+                        res.redirect('/register')
+                    }
+                }
+            })
+        }
+    })      
 })
 app.get('/confirmation', (req,res) => {
     res.render("confirm.ejs", {message: ""})
@@ -119,14 +109,12 @@ app.get('/confirmation/:token', (req,res) => {
             res.render("confirm.ejs", {message: "This confirmation link has expired. Enter your email below to confirm your account."})
         }
         else {
-            const id = decoded.id
-            console.log(decoded)
-            User.findOneAndUpdate({_id: id}, {confirmed: true})
-            .then(() => res.redirect('/login'))
-            .catch((e) => {
+            if(User.confirmUser(decoded.id)){
+                res.redirect('/login')
+            } else {
                 res.send('error')
-                console.log(e)
-            })
+            }
+            
         }
     })
 })
