@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: false
     },
     email: {
         type: String,
@@ -17,17 +17,28 @@ const userSchema = new Schema({
     confirmed: {
         type: Boolean,
         required: true
+    },
+    setupFinished: {
+        type: Boolean,
+        required: true
+    },
+    description: {
+        type: String, 
+        required: false
     }
 })
 
-userSchema.statics.create = function(name, email, password, confirmed) {
+userSchema.statics.create = function(email, password, confirmed, setup) {
     const user = new this({
-        name: name,
         email: email,
         password: password,
-        confirmed, confirmed
+        confirmed, confirmed,
+        setupFinished: setup
     })
     user.save()
+}
+
+userSchema.statics.setup = function(name, description){
 
 }
 

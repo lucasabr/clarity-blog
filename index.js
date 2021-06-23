@@ -12,9 +12,17 @@ const methodOverride = require('method-override')
 const jwt = require("jsonwebtoken");
 const emailer = require('./emailer')
 const email = new emailer()
+const cookieParser = require("cookie-parser")
+const cors = require("cors")
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({extended: true}));
 app.use(express.static('source'));
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}))
+
+
 //Database Init
 const mongoose = require('mongoose');
 const User =  require('./models/user');
@@ -22,6 +30,8 @@ const uri = "mongodb+srv://lucasabr:topsecretpassword123@lucas-database.ckz0z.mo
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true})
     .then((result) => app.listen(PORT))
     .catch((err) => console.log(err))
+
+
 //Passport Init
 const passport = require('passport');
 const initializePass = require('./passport-config')
@@ -29,10 +39,11 @@ initializePass(passport);
 app.set('view-engine', 'ejs');
 app.use(flash());
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false
+    secret: "secretcode",
+    resave: true,
+    saveUninitialized: true
 }));
+app.use(cookieParser("secretcode"))
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
@@ -40,49 +51,43 @@ app.use(methodOverride('_method'))
 
 
 //Routes and Requests
-app.get('/', checkAuthenticated, (req, res) => {
-    res.render('index.ejs', {name: req.user.name})
-})
-
-app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.render('login.ejs')
-})
-
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/login',
     failureFlash: true
 })) 
 
-app.get('/register', checkNotAuthenticated, (req, res) => {
-    res.render('register.ejs', {message: "You must register to access many of the sites features"})
-})
 
-app.post('/register', checkNotAuthenticated, async (req, res) => {
-    User.isMailUnique(req.body.email, function(isUnique) {
-        if(!isUnique){
-            res.render("register.ejs", {message: "ERROR! There already exists an account with this email"}) 
-            unique=false
+app.post('/register', checkNotAuthenticated, (req, res) => {
+    User.isMailUnique(req.body.email, async function(isUnique) {
+        if(!isUnique){ 
+            res.send({
+                success: false,
+                msg: "Error! There already exists an account with this email."
+            }) &&
+            res.end()
         }
         else{
-            User.isNameUnique(req.body.name, async function(isUnique) {
-                if(!isUnique){
-                    res.render("register.ejs", {message: "ERROR! There already exists an account with this name"}) 
-                    unique=false
-                } else{
-                    try{
-                        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-                        User.create(req.body.name, req.body.email, hashedPassword, false)
-                        res.render("register.ejs", {message: "Please confirm your account via email before logging in."})
-                    } catch (e){
-                        console.log(e);
-                        res.redirect('/register')
-                    }
-                }
-            })
+            try{
+                const hashedPassword = await bcrypt.hash(req.body.password, 10);
+                User.create(req.body.email, hashedPassword, false, false)
+                res.send({
+                    success: true,
+                    msg: "Account Successfully created."
+                }) 
+                res.end()
+            } catch (e){
+                console.log(e);
+                res.send({
+                    success: false,
+                    msg: "Server Error."
+                })
+                res.status(404).end()
+            }
         }
-    })      
+    })                
 })
+
 app.get('/confirmation', (req,res) => {
     res.render("confirm.ejs", {message: ""})
 })
