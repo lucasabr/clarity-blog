@@ -52,6 +52,7 @@ function App() {
 	};
 
 	const toggleAuthState = () => {
+		Array.from(document.querySelectorAll('input')).forEach(input => (input.value = ''));
 		authState === 1 ? clearReg() : clearLogin();
 		setAuthState(authState * -1);
 	};
