@@ -109,24 +109,23 @@ app.post('/register', (req, res) => {
 	});
 });
 
-app.get('/confirmation', (req, res) => {
-	res.render('confirm.ejs', { message: '' });
-});
-
 app.post('/confirmation', (req, res) => {
 	User.findOne({ email: req.body.email }).then(user => {
 		if (!user) {
-			res.render('confirm.ejs', {
-				message: 'No account exists with the provided email',
+			res.send({
+				success: false,
+				msg: 'No account exists with the provided email',
 			});
 		} else if (user.confirmed) {
-			res.render('confirm.ejs', {
-				message: 'The following account has already been confirmed',
+			res.send({
+				success: false,
+				msg: 'The following account has already been confirmed',
 			});
 		} else {
 			email.sendEmail(user.email, user.id);
-			res.render('confirm.ejs', {
-				message: 'Confirmation sent to your email',
+			res.send({
+				success: true,
+				msg: 'Confirmation sent to your email!',
 			});
 		}
 	});
