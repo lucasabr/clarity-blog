@@ -62,6 +62,7 @@ app.post('/login', (req, res, next) =>
 			res.send({
 				success: false,
 				msg: info,
+				user: {},
 			});
 		else {
 			req.logIn(user, err => {
@@ -73,6 +74,7 @@ app.post('/login', (req, res, next) =>
 				};
 				res.send({
 					success: true,
+					msg: '',
 					user: userInformation,
 				});
 			});

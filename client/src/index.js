@@ -5,15 +5,11 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import store from './store';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 ReactDOM.render(
 	<Provider store={store}>
 		<Router>
-			<Switch>
-				<Route path='/auth'>
-					<App />
-				</Route>
-			</Switch>
+			<App />
 		</Router>
 	</Provider>,
 	document.getElementById('root'),
