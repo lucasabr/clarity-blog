@@ -2,18 +2,19 @@ import { useState } from 'react';
 import axios from 'axios';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loggedIn, loggedOut } from '../actions/authActions';
+import { loggedIn } from '../actions/authActions';
+import { useHistory } from 'react-router-dom';
 const AuthForm = () => {
 	const [regUser, setRegUser] = useState('');
 	const [regPass, setRegPass] = useState('');
 	const [loginUser, setLoginUser] = useState('');
 	const [loginPass, setLoginPass] = useState('');
 	const [authState, setAuthState] = useState(1);
-	const [regMsg, setRegMsg] = useState('test');
+	const [regMsg, setRegMsg] = useState('');
 	const loginMsg = useSelector(state => state.auth.msg);
 	const dispatch = useDispatch();
 	//---------------------------End of State---------------------------------------------------
-
+	let history = useHistory();
 	const login = () =>
 		loginUser !== '' &&
 		loginPass !== '' &&
@@ -43,7 +44,11 @@ const AuthForm = () => {
 				},
 				withCredentials: true,
 				url: 'http://localhost:5000/register',
-			}).then(res => console.log(res));
+			}).then(res => {
+				res.data.success
+					? setRegMsg('Please confirm your account via email before logging in.')
+					: setRegMsg(res.data.msg);
+			});
 	};
 
 	//-------------------------------------End of Requests---------------------------------------

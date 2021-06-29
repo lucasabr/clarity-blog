@@ -18,9 +18,9 @@ export default function (state = initialState, action) {
 		case LOGGED_OUT:
 			return {
 				...state,
-				status: false,
-				msg: '',
-				user: {},
+				status: action.payload.success,
+				msg: action.payload.msg,
+				user: action.payload.user,
 			};
 		case UPDATED_ACCOUNT:
 			return {

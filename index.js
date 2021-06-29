@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 5000;
 const bcrypt = require('bcrypt');
 const flash = require('express-flash');
 const session = require('express-session');
-const methodOverride = require('method-override');
 const jwt = require('jsonwebtoken');
 const emailer = require('./emailer');
 const cookieParser = require('cookie-parser');
@@ -52,7 +51,6 @@ app.use(
 app.use(cookieParser('secretcode'));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(methodOverride('_method'));
 
 //Routes and Requests
 app.post('/login', (req, res, next) =>
@@ -157,6 +155,7 @@ app.get('/confirmation/:token', (req, res) => {
 	});
 });
 app.delete('/logout', (req, res) => {
-	req.logOut();
-	res.redirect('/login');
+	req.session.destroy(function (err) {
+		res.send('Success!');
+	});
 });

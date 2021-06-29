@@ -10,6 +10,15 @@ export const loggedIn = data => {
 	};
 };
 
-export const loggedOut = () => dispatch => {};
+export const loggedOut = () => {
+	return {
+		type: LOGGED_OUT,
+		payload: {
+			success: false,
+			msg: '',
+			user: {},
+		},
+	};
+};
 
 export const updatedAccount = () => dispatch => {};
