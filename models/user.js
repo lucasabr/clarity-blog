@@ -23,6 +23,10 @@ const userSchema = new Schema({
 		type: Boolean,
 		required: true,
 	},
+	private: {
+		type: Boolean,
+		required: false,
+	},
 	description: {
 		type: String,
 		required: false,
@@ -67,7 +71,14 @@ userSchema.statics.isNameUnique = function (name, callback) {
 		}
 	});
 };
-
+userSchema.statics.updateAccount = function (email, name, description, private, callback) {
+	this.findOneAndUpdate(
+		{ email: email },
+		{ name: name, private: private, description: description, setupFinished: true },
+	)
+		.then(() => callback(null))
+		.catch(err => callback(err));
+};
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

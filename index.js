@@ -159,3 +159,25 @@ app.delete('/logout', (req, res) => {
 		res.send('Success!');
 	});
 });
+
+app.post('/updateAccount', (req, res) => {
+	User.updateAccount(
+		req.body.email,
+		req.body.username,
+		req.body.description,
+		req.body.private,
+		function cb(err) {
+			if (err)
+				res.send({
+					success: false,
+					msg: err,
+				});
+			else
+				res.send({
+					success: true,
+					msg: 'Your account is updated',
+					user: user,
+				});
+		},
+	);
+});
