@@ -166,7 +166,7 @@ app.post('/updateAccount', (req, res) => {
 		req.body.username,
 		req.body.description,
 		req.body.private,
-		function cb(err) {
+		function cb(err, user) {
 			if (err)
 				res.send({
 					success: false,

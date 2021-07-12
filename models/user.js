@@ -76,8 +76,8 @@ userSchema.statics.updateAccount = function (email, name, description, private, 
 		{ email: email },
 		{ name: name, private: private, description: description, setupFinished: true },
 	)
-		.then(() => callback(null))
-		.catch(err => callback(err));
+		.then(user => callback(null, user))
+		.catch(err => callback(err, null));
 };
 const User = mongoose.model('User', userSchema);
 
