@@ -1,9 +1,9 @@
 import { LOGGED_IN, LOGGED_OUT, UPDATED_ACCOUNT } from '../actions/types';
 
 const initialState = {
-	status: localStorage.getItem('token') ? true : false,
+	status: localStorage.getItem('logged') ? true : false,
 	msg: 'okay',
-	user: localStorage.getItem('token') ? JSON.parse(localStorage.getItem('token')) : {},
+	user: localStorage.getItem('logged') ? JSON.parse(localStorage.getItem('token')) : {},
 };
 
 export default function (state = initialState, action) {
@@ -25,7 +25,7 @@ export default function (state = initialState, action) {
 		case UPDATED_ACCOUNT:
 			return {
 				...state,
-				status: action.payload.auth,
+				status: action.payload.success,
 				msg: action.payload.msg,
 				user: action.payload.user,
 			};

@@ -13,7 +13,7 @@ const AlreadyAuth = () => {
 			withCredentials: true,
 			url: 'http://localhost:5000/logout',
 		}).then(res => {
-			localStorage.removeItem('token');
+			localStorage.removeItem('logged');
 			dispatch(loggedOut());
 		});
 	};

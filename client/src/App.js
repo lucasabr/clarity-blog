@@ -6,6 +6,7 @@ import AccountForm from './components/AccountForm';
 import NotLoggedIn from './components/NotLoggedIn';
 function App() {
 	const auth = useSelector(state => state.auth.status);
+	console.log(auth);
 	return (
 		<Switch>
 			<Route exact path='/auth'>

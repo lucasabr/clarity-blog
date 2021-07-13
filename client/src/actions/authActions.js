@@ -21,4 +21,13 @@ export const loggedOut = () => {
 	};
 };
 
-export const updatedAccount = () => dispatch => {};
+export const updatedAccount = data => {
+	return {
+		type: UPDATED_ACCOUNT,
+		payload: {
+			success: data.success,
+			msg: data.msg,
+			user: data.user,
+		},
+	};
+};

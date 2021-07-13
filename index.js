@@ -69,6 +69,9 @@ app.post('/login', (req, res, next) =>
 					email: req.user.email,
 					confirmed: req.user.confirmed,
 					setupFinished: req.user.setupFinished,
+					name: req.user.username,
+					description: req.user.description,
+					private: req.user.private,
 				};
 				res.send({
 					success: true,

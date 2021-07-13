@@ -28,6 +28,7 @@ const AuthForm = () => {
 			url: 'http://localhost:5000/login',
 		}).then(res => {
 			if (res.data.success) {
+				localStorage.setItem('logged', 'True');
 				localStorage.setItem('token', JSON.stringify(res.data.user));
 			}
 			dispatch(loggedIn(res.data));
