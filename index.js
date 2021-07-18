@@ -12,6 +12,8 @@ const jwt = require('jsonwebtoken');
 const emailer = require('./emailer');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const multer = require('multer');
+const upload = multer({ dest: '' });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('source'));
@@ -184,3 +186,5 @@ app.post('/updateAccount', (req, res) => {
 		},
 	);
 });
+
+app.post('/updateImage', upload.single('image'), (req, res) => {});
