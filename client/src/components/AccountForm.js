@@ -8,6 +8,7 @@ const AccountForm = () => {
 	const [username, setUsername] = useState('');
 	const [description, setDesc] = useState('');
 	const [priv, setPriv] = useState(false);
+	const [image, setImage] = useState();
 	const dispatch = useDispatch();
 	const editProfile = () => {
 		username !== '' &&
@@ -30,10 +31,35 @@ const AccountForm = () => {
 			});
 	};
 
+	const fileSelected = event => {
+		const file = event.target.files[0];
+		setImage(file);
+	};
+
+	const editAvatar = () => {
+		if (!image) return;
+		else {
+			const form = new FormData();
+			form.append('image', image);
+			form.append('email', user.email);
+			axios({
+				method: 'post',
+				data: form,
+				withCredentials: true,
+				url: 'http://localhost:5000/updateImage',
+			}).then(res => {
+				console.log(res.data);
+			});
+		}
+	};
 	return (
 		<div>
+			<h1>Edit Profile</h1>
+			<label>Change Avatar </label>
+			<input onChange={fileSelected} type='file' accept='image/*'></input>
+			<button onClick={() => editAvatar()}>Save</button>
 			<form onSubmit={e => e.preventDefault()}>
-				<h1>Edit Profile</h1>
+				<hr></hr>
 				<p>Email: {user.email}</p>
 				<label for='username'>Username: </label>
 				<input
@@ -46,7 +72,6 @@ const AccountForm = () => {
 					placeholder={user.name ? user.name : ''}
 					required
 				/>
-				<hr></hr>
 				<label for='description'>Description</label>
 				<input
 					type='text'

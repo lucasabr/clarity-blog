@@ -13,7 +13,16 @@ const emailer = require('./emailer');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const multer = require('multer');
-const upload = multer({ dest: '' });
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
+// const upload = multer({ dest: 'uploads/' });
+const sharp = require('sharp');
+const uploadFile = require('./s3');
+
+const fs = require('fs');
+const util = require('util');
+const unlinkFile = util.promisify(fs.unlink);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('source'));
@@ -187,4 +196,19 @@ app.post('/updateAccount', (req, res) => {
 	);
 });
 
-app.post('/updateImage', upload.single('image'), (req, res) => {});
+app.post('/updateImage', upload.single('image'), (req, res) => {
+	const newPath = 'uploads/newPhoto.jpg';
+	const newFile = {
+		path: newPath,
+		filename: `new${req.file.originalname}`,
+	};
+	sharp(req.file.buffer)
+		.resize({ height: 250, width: 250 })
+		.toFile(newPath)
+		.then(async () => {
+			const result = await uploadFile(newFile);
+			await unlinkFile(newPath);
+			console.log(result);
+		});
+	res.send('good');
+});
