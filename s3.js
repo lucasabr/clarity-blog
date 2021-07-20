@@ -25,4 +25,15 @@ function upload(file) {
 	return s3.upload(uploadParams).promise();
 }
 
-module.exports = upload;
+exports.uploadFile = upload;
+
+function deleteFile(key) {
+	const deleteParams = {
+		Bucket: name,
+		Key: key,
+	};
+
+	return s3.delete(deleteParams).promise();
+}
+
+exports.deleteFile = deleteFile;

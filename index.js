@@ -17,7 +17,7 @@ var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 // const upload = multer({ dest: 'uploads/' });
 const sharp = require('sharp');
-const uploadFile = require('./s3');
+const { uploadFile, deleteFile } = require('./s3');
 
 const fs = require('fs');
 const util = require('util');
@@ -32,7 +32,9 @@ app.use(
 		credentials: true,
 	}),
 );
-
+const defaultAvatar =
+	'https://mysuperspecial-aws-bucket.s3.amazonaws.com/newblank-profile-picture-png.png';
+const defaultAvatarKey = 'newblank-profile-picture-png.png';
 //Database Init
 const mongoose = require('mongoose');
 const User = require('./models/user');
@@ -105,7 +107,7 @@ app.post('/register', (req, res) => {
 		} else {
 			try {
 				const hashedPassword = await bcrypt.hash(req.body.password, 10);
-				User.create(req.body.email, hashedPassword, false, false);
+				User.create(req.body.email, hashedPassword, false, false, defaultAvatar, defaultAvatarKey);
 				res.send({
 					success: true,
 					msg: 'Account Successfully created.',
@@ -195,7 +197,20 @@ app.post('/updateAccount', (req, res) => {
 		},
 	);
 });
-
+const updateImage = (err, user) => {
+	if (err) {
+		res.send({
+			success: false,
+			msg: err,
+		});
+	} else {
+		res.send({
+			success: true,
+			msg: '',
+			user: user,
+		});
+	}
+};
 app.post('/updateImage', upload.single('image'), (req, res) => {
 	const newPath = 'uploads/newPhoto.jpg';
 	const newFile = {
@@ -208,7 +223,9 @@ app.post('/updateImage', upload.single('image'), (req, res) => {
 		.then(async () => {
 			const result = await uploadFile(newFile);
 			await unlinkFile(newPath);
-			console.log(result);
+			User.findOne({ email: req.body.email }).then(async user => {
+				if (user.avatarKey !== defaultAvatarKey) await deleteFile(user.avatarKey);
+				User.updateAvatar(user.email, result, updateImage);
+			});
 		});
-	res.send('good');
 });

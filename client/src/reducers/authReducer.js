@@ -23,12 +23,20 @@ export default function (state = initialState, action) {
 				user: action.payload.user,
 			};
 		case UPDATED_ACCOUNT:
-			return {
-				...state,
-				status: action.payload.success,
-				msg: action.payload.msg,
-				user: action.payload.user,
-			};
+			if (action.payload.success) {
+				return {
+					...state,
+					status: action.payload.success,
+					msg: action.payload.msg,
+					user: action.payload.user,
+				};
+			} else {
+				return {
+					...state,
+					status: action.payload.success,
+					msg: action.payload.msg,
+				};
+			}
 		default:
 			return state;
 	}

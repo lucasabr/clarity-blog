@@ -31,14 +31,24 @@ const userSchema = new Schema({
 		type: String,
 		required: false,
 	},
+	avatar: {
+		type: String,
+		required: true,
+	},
+	avatarKey: {
+		type: String,
+		required: true,
+	},
 });
 
-userSchema.statics.create = function (email, password, confirmed, setup) {
+userSchema.statics.create = function (email, password, confirmed, setup, avatar, avatarKey) {
 	const user = new this({
 		email: email,
 		password: password,
 		confirmed: confirmed,
 		setupFinished: setup,
+		avatar: avatar,
+		avatarKey: avatarKey,
 	});
 	console.log(user.id);
 	user.save().then(result => emailer.sendEmail(email, user.id));
@@ -79,6 +89,13 @@ userSchema.statics.updateAccount = function (email, name, description, private, 
 		.then(user => callback(null, user))
 		.catch(err => callback(err, null));
 };
+
+userSchema.statics.updateAvatar = function (email, newAvatar, callback) {
+	this.findOneAndUpdate({ email: email }, { avatar: newAvatar.location, avatarKey: newAvatar.Key })
+		.then(user => callback(null, user))
+		.catch(err => callback(err, null));
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
