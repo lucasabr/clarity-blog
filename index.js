@@ -222,10 +222,24 @@ app.post('/updateImage', upload.single('image'), (req, res) => {
 		.toFile(newPath)
 		.then(async () => {
 			const result = await uploadFile(newFile);
+			console.log(result.Location);
 			await unlinkFile(newPath);
 			User.findOne({ email: req.body.email }).then(async user => {
 				if (user.avatarKey !== defaultAvatarKey) await deleteFile(user.avatarKey);
-				User.updateAvatar(user.email, result, updateImage);
+				User.updateAvatar(user.email, result, (err, user) => {
+					if (err) {
+						res.send({
+							success: false,
+							msg: err,
+						});
+					} else {
+						res.send({
+							success: true,
+							msg: '',
+							user: user,
+						});
+					}
+				});
 			});
 		});
 });

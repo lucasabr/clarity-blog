@@ -25,7 +25,6 @@ const AccountForm = () => {
 			}).then(res => {
 				if (res.data.success) {
 					localStorage.setItem('token', JSON.stringify(res.data.user));
-					console.log(res.data);
 					dispatch(updatedAccount(res.data));
 				}
 			});
@@ -48,7 +47,8 @@ const AccountForm = () => {
 				withCredentials: true,
 				url: 'http://localhost:5000/updateImage',
 			}).then(res => {
-				console.log(res.data);
+				localStorage.setItem('token', JSON.stringify(res.data.user));
+				dispatch(updatedAccount(res.data));
 			});
 		}
 	};

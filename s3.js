@@ -33,7 +33,7 @@ function deleteFile(key) {
 		Key: key,
 	};
 
-	return s3.delete(deleteParams).promise();
+	return s3.deleteObject(deleteParams).promise();
 }
 
 exports.deleteFile = deleteFile;

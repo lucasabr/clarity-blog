@@ -91,7 +91,7 @@ userSchema.statics.updateAccount = function (email, name, description, private, 
 };
 
 userSchema.statics.updateAvatar = function (email, newAvatar, callback) {
-	this.findOneAndUpdate({ email: email }, { avatar: newAvatar.location, avatarKey: newAvatar.Key })
+	this.findOneAndUpdate({ email: email }, { avatar: newAvatar.Location, avatarKey: newAvatar.Key })
 		.then(user => callback(null, user))
 		.catch(err => callback(err, null));
 };
