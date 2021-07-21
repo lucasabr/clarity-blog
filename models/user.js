@@ -81,6 +81,14 @@ userSchema.statics.isNameUnique = function (name, callback) {
 		}
 	});
 };
+
+userSchema.statics.getAccount = function (name, callback) {
+	this.findOne({ name: name }).then(user => {
+		if (user) {
+			callback(user, true);
+		} else callback(null, false);
+	});
+};
 userSchema.statics.updateAccount = function (email, name, description, private, callback) {
 	this.findOneAndUpdate(
 		{ email: email },

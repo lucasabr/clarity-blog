@@ -177,40 +177,36 @@ app.delete('/logout', (req, res) => {
 });
 
 app.post('/updateAccount', (req, res) => {
-	User.updateAccount(
-		req.body.email,
-		req.body.username,
-		req.body.description,
-		req.body.private,
-		function cb(err, user) {
-			if (err)
-				res.send({
-					success: false,
-					msg: err,
-				});
-			else
-				res.send({
-					success: true,
-					msg: 'Your account is updated',
-					user: user,
-				});
-		},
-	);
+	User.isNameUnique(req.body.username, success => {
+		if (success) {
+			User.updateAccount(
+				req.body.email,
+				req.body.username,
+				req.body.description,
+				req.body.private,
+				function cb(err, user) {
+					if (err)
+						res.send({
+							success: false,
+							msg: err,
+						});
+					else
+						res.send({
+							success: true,
+							msg: 'Your account is updated',
+							user: user,
+						});
+				},
+			);
+		} else {
+			res.send({
+				success: false,
+				msg: 'Username already taken',
+			});
+		}
+	});
 });
-const updateImage = (err, user) => {
-	if (err) {
-		res.send({
-			success: false,
-			msg: err,
-		});
-	} else {
-		res.send({
-			success: true,
-			msg: '',
-			user: user,
-		});
-	}
-};
+
 app.post('/updateImage', upload.single('image'), (req, res) => {
 	const newPath = 'uploads/newPhoto.jpg';
 	const newFile = {
@@ -242,4 +238,21 @@ app.post('/updateImage', upload.single('image'), (req, res) => {
 				});
 			});
 		});
+});
+
+app.get('/accounts/:username', (req, res) => {
+	User.getAccount(req.params.username, (user, success) => {
+		if (success) {
+			res.send({
+				success: true,
+				msg: '',
+				user: user,
+			});
+		} else {
+			res.send({
+				success: false,
+				msg: 'user does not exist',
+			});
+		}
+	});
 });
